@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+
+<!-- Navigation -->
+<nav class="bg-indigo-600">
+    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+        <div class="relative flex items-center justify-between h-16">
+            
+            <!-- Logo -->
+            <div class="flex-shrink-0">
+                <a href="#" class="text-white text-2xl font-bold">
+                    <h1>Microblog</h1>
+                </a>
+            </div>
+
+            <!-- Menu items -->
+            <div class="hidden sm:block">
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="#" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Blog</a>
+                    <a href="#" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Todo</a>
+                </div>
+            </div>
+            <div class="hidden sm:block sm:ml-6">
+                <div class="flex space-x-4">
+                    {% if g.user %}
+                        <span class="text-gray-300 px-3 py-2 rounded-md text-sm font-medium">{{ g.user['username'] }}</span>
+                        <a href="{{ url_for('auth.logout')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Register</a>
+                        <a href="{{ url_for('auth.login')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile menu (for smaller screens) -->
+    <div class="sm:hidden">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+            <a href="#" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Home</a>
+            <a href="#" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Blog</a>
+            <a href="#" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Todo</a>
+            {% if g.user %}
+                <span class="text-gray-300 block px-3 py-2 rounded-md text-base font-medium">{{ g.user['username'] }}</span>
+                <a href="{{ url_for('auth.logout')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Logout</a>
+            {% else %}
+                <a href="{{ url_for('auth.register')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Register</a>
+                <a href="{{ url_for('auth.login')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Login</a>
+            {% endif %}
+            
+        </div>
+    </div>
+</nav>
+<section class="block">
+    {% block content %}{% endblock %}
+</section>
+</body>
+</html>
