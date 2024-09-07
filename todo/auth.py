@@ -71,9 +71,9 @@ def register():
         if not username:
             error = 'Username is required.'
         elif not password:
-            error = 'Password is required'
+            error = 'Password is required.'
         elif not confirm_password:
-            error = 'Confirm password is required'
+            error = 'Confirm password is required.'
         elif password != confirm_password:
             error = "Confirm password doesn't match."
         if error is None:
