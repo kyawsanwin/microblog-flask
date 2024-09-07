@@ -7,7 +7,7 @@ from todo.db import get_db
 
 bp = Blueprint('todo', __name__, url_prefix='/todos')
 
-@bp.route('/', methods=('GET', 'POST'))
+@bp.route('', methods=('GET', 'POST'))
 @login_required
 def index():
     if request.method == 'POST':
