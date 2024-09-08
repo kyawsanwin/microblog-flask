@@ -1,12 +1,7 @@
 import pytest
 from todo.db import get_db
 
-@pytest.mark.parametrize('path', (
-    '/todos',
-    '/todos/create',
-    '/todos/delete/1'
-))
-def test_login_required(client, path):
+def test_login_required(client):
     response = client.get('/todos')
     assert response.headers["Location"] == "/auth/login"
 
