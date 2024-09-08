@@ -1,11 +1,30 @@
 from flask import (
-    Blueprint, render_template, request, flash, g
+    Blueprint, render_template, request, flash, g, jsonify
 )
 
 from todo.auth import login_required
 from todo.db import get_db
+from werkzeug.exceptions import abort
 
 bp = Blueprint('todo', __name__, url_prefix='/todos')
+
+def get_todo(id, check_author=True):
+    todo = get_db().execute(
+        'SELECT t.id, title, is_done, user_id FROM todos t'
+        ' JOIN users u ON t.user_id = u.id'
+        ' WHERE t.id = ?',
+        (id,)
+    ).fetchone()
+    
+    if todo is None:
+        abort(404, description=f"Todo id {id} doesn't exist.")
+
+    if check_author and todo['user_id'] != g.user['id']:
+        error_json = {
+            'error': f"forbidden."
+        }
+        abort(403, f"{error_json}")
+    return todo
 
 @bp.route('', methods=('GET', 'POST'))
 @login_required
@@ -36,3 +55,15 @@ def index():
         ' ORDER BY is_done ASC'
     ).fetchall()
     return render_template('todo/index.html', todos=todos)  
+
+@bp.route("/delete/<int:id>", methods=('POST',))
+@login_required
+def delete(id):
+    get_todo(id)
+    db = get_db()
+    db.execute('DELETE FROM todos WHERE id = ?', (id,))
+    db.commit()
+    return {
+        "status": 200,
+        "deleted": 1
+    }
