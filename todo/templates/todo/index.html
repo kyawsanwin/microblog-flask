@@ -25,10 +25,11 @@
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
         <ul class="divide-y divide-gray-200">
             {% for todo in todos %}
+                {% set checked = "checked" if todo['is_done'] == 1 else "" %}
             <li id="item-{{ todo['id'] }}" class="flex items-center justify-between p-4">
                 <div class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-5 w-5 text-indigo-600" />
-                    <span class="ml-3 text-gray-800">{{ todo['title'] }}</span>
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-indigo-600 action-check-box" data-item-id="{{ todo['id'] }}" {{ checked }}/>
+                    <span class="ml-3 text-gray-800">{{ todo['title'] }} {{todo['is_done']}}</span>
                 </div>
                 <div class="flex space-x-2">
                     <!-- Edit Icon (Pencil with Book) -->
@@ -93,9 +94,28 @@
         const deleteModal = document.getElementById('deleteModal');
         const deleteButtons = document.querySelectorAll('.deleteButton');
         const cancelButton = document.getElementById('cancelButton');
+
+        const doneCheckBoxes = document.querySelectorAll('.action-check-box')
         
         let _path = ''
         let _itemIDToDelete = null;
+
+        // Add event listener for each checkbox
+        doneCheckBoxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                id = checkbox.getAttribute('data-item-id');
+                url = "/todos/" + id + "/action"
+                is_done = checkbox.checked ? 1 : 0
+                fetch(url, { method:"POST",
+                    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+                    body:'is_done=' + is_done})
+                    .then(response => {
+                        if (response.redirected) {
+                            window.location = response.url
+                        }
+                    })
+            });
+        });
         
         // Add event listener for each delete button to popup confirm box.
         deleteButtons.forEach(button => {

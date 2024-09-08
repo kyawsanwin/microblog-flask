@@ -67,3 +67,17 @@ def delete(id):
         "status": 200,
         "deleted": 1
     }
+
+@bp.route("/<int:id>/action", methods=('POST',))
+@login_required
+def action(id):
+    if request.method == 'POST':
+        is_done = request.form['is_done']
+        get_todo(id)
+        db = get_db()
+        db.execute('UPDATE todos SET is_done = ? WHERE id = ?', (is_done, id,))
+        db.commit()
+        return {
+            "status": 200,
+            "updated": 1
+        }

@@ -42,3 +42,17 @@ def test_delete_forbidden(client, auth, app):
     auth.login()
     response = client.post('/todos/delete/2')
     assert b'error' in response.data
+
+@pytest.mark.parametrize(('id', 'is_done'), (
+    (1, 1),
+    (3, 0),
+))
+def test_action(client, auth, app, id, is_done):
+    auth.login()
+    response = client.post(f"/todos/{id}/action", data={'is_done': is_done})
+    assert b'updated' in response.data
+    
+    with app.app_context():
+        db = get_db()
+        todo = db.execute("SELECT * FROM todos WHERE id = ?", (id,)).fetchone()
+        assert todo['is_done'] == is_done
