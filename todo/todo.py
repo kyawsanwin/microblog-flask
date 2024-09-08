@@ -20,10 +20,7 @@ def get_todo(id, check_author=True):
         abort(404, description=f"Todo id {id} doesn't exist.")
 
     if check_author and todo['user_id'] != g.user['id']:
-        error_json = {
-            'error': f"forbidden."
-        }
-        abort(403, f"{error_json}")
+        abort(403, description='Not authorized.')
     return todo
 
 @bp.route('', methods=('GET', 'POST'))
