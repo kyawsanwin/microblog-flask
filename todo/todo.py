@@ -78,3 +78,17 @@ def action(id):
             "status": 200,
             "updated": 1
         }
+
+@bp.route("/<int:id>/update", methods=('POST',))
+@login_required
+def update(id):
+    if request.method == 'POST':
+        title = request.form['title']
+        get_todo(id)
+        db = get_db()
+        db.execute('UPDATE todos SET title = ? WHERE id = ?', (title, id,))
+        db.commit()
+        return {
+            "status": 200,
+            "updated": 1
+        }

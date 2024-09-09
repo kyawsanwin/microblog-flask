@@ -51,3 +51,17 @@ def test_action(client, auth, app, id, is_done):
         db = get_db()
         todo = db.execute("SELECT * FROM todos WHERE id = ?", (id,)).fetchone()
         assert todo['is_done'] == is_done
+        
+@pytest.mark.parametrize(('id', 'title'), (
+    (1, "Updated one."),
+    (3, "Updated two."),
+))
+def test_update(client, auth, app, id, title):
+    auth.login()
+    response = client.post(f"/todos/{id}/update", data={'title': title})
+    assert b'updated' in response.data
+    
+    with app.app_context():
+        db = get_db()
+        todo = db.execute("SELECT * FROM todos WHERE id = ?", (id,)).fetchone()
+        assert todo['title'] == title

@@ -26,21 +26,13 @@
         <ul class="divide-y divide-gray-200">
             {% for todo in todos %}
                 {% set checked = "checked" if todo['is_done'] == 1 else "" %}
+                {% set id = todo['id'] %}
             <li id="item-{{ todo['id'] }}" class="flex items-center justify-between p-4">
-                <div class="flex items-center">
+                <div class="flex items-center w-full">
                     <input type="checkbox" class="form-checkbox h-5 w-5 text-indigo-600 action-check-box" data-item-id="{{ todo['id'] }}" {{ checked }}/>
-                    <span class="ml-3 text-gray-800">{{ todo['title'] }} {{todo['is_done']}}</span>
+                    <input class="todo-item focus:outline-none focus:ring-0 p-1 m-1 text-gray-700 w-full" data-item-id={{ id }} value="{{ todo['title'] }}"  readonly/>
                 </div>
                 <div class="flex space-x-2">
-                    <!-- Edit Icon (Pencil with Book) -->
-                    <button class="text-indigo-600 hover:text-indigo-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <!-- Pencil Icon -->
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232a1 1 0 00-1.414 0L7.05 11.999l-.293 3.293 3.293-.293 6.768-6.768a1 1 0 000-1.414l-1.293-1.293z" />
-                            <!-- Book Icon -->
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8H6a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-6a2 2 0 00-2-2zM12 8V6a2 2 0 012-2h4a2 2 0 012 2v6a2 2 0 01-2 2h-2" />
-                        </svg>
-                    </button>
                     <!-- Delete Icon -->
                     <button class="text-red-600 hover:text-red-800 deleteButton" id="deleteButton" data-item-url="{{ url_for('todo.delete', id=todo['id']) }}" data-item-id="{{ todo['id'] }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,10 +88,72 @@
         const cancelButton = document.getElementById('cancelButton');
 
         const doneCheckBoxes = document.querySelectorAll('.action-check-box')
+        const todoItems = document.querySelectorAll('.todo-item')
         
         let _path = ''
         let _itemIDToDelete = null;
 
+        todoItems.forEach((item) => {
+            let todoId = null;
+            let oldText = null;
+            let isUpdated = false;
+        
+            // Function to handle double-click event to make the todo item editable
+            const makeEditable = () => {
+                todoId = item.getAttribute('data-item-id');
+                oldText = item.value;
+                isUpdated = false;
+                item.readOnly = false;
+                item.className = 'todo-item flex-grow p-1 m-1 text-gray-700 w-full rounded';
+                item.focus();
+            };
+        
+            // Function to save the edited todo item
+            const saveTodo = () => {
+                hideInput();
+                const url = `/todos/${todoId}/update`;
+                const title = item.value;
+        
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `title=${encodeURIComponent(title)}`,
+                })
+                    .then((response) => {
+                        if (response.redirected) {
+                            window.location = response.url;
+                        }
+                    })
+                    .catch((error) => console.error('Error saving todo:', error));
+            };
+        
+            // Function to restore the input to its non-editable state
+            const hideInput = () => {
+                item.className = 'todo-item focus:outline-none focus:ring-0 p-1 m-1 text-gray-700 w-full';
+                item.readOnly = true;
+            };
+        
+            // Handle double-click to make the todo editable
+            item.addEventListener('dblclick', makeEditable);
+        
+            // Handle keypress events (save on 'Enter', cancel on 'Escape')
+            item.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    saveTodo();
+                }
+            });
+        
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    item.value = oldText;
+                    hideInput();
+                }
+            });
+        
+            // Save the todo item when the input loses focus
+            item.addEventListener('blur', saveTodo);
+        });
+        
         // Add event listener for each checkbox
         doneCheckBoxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => {
