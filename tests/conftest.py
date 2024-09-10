@@ -2,8 +2,8 @@ import os
 import tempfile
 
 import pytest
-from todo import create_app
-from todo.db import get_db, init_db
+from microblog import create_app
+from microblog.db import get_db, init_db
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf8")

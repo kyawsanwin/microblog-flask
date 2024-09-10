@@ -28,9 +28,9 @@ def create_app(test_config=None):
     def user_forbidden(e):
         return jsonify(error=str(e)), 403
 
-    @app.route("/hello")
-    def hello():
-        return "Hello, World"
+    from .main import bp as main_bp
+
+    app.register_blueprint(main_bp)
 
     from . import db
 
@@ -40,7 +40,7 @@ def create_app(test_config=None):
 
     app.register_blueprint(auth.bp)
 
-    from . import todo
+    from .todo import todo
 
     app.register_blueprint(todo.bp)
     return app

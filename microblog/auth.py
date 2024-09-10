@@ -11,7 +11,7 @@ from flask import (
     g,
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from todo.db import get_db
+from microblog.db import get_db
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 

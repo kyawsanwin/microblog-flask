@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, g
 
-from todo.auth import login_required
-from todo.db import get_db
+from microblog.auth import login_required
+from microblog.db import get_db
 from werkzeug.exceptions import abort
 
 bp = Blueprint("todo", __name__, url_prefix="/todos")

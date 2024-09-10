@@ -1,5 +1,5 @@
 import pytest
-from todo.db import get_db
+from microblog.db import get_db
 
 
 def test_login_required(client):

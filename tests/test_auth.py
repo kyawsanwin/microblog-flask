@@ -1,6 +1,6 @@
 import pytest
 from flask import g, session
-from todo.db import get_db
+from microblog.db import get_db
 
 
 def test_register(client, app):

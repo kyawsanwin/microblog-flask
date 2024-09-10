@@ -1,6 +1,6 @@
 import sqlite3
 import pytest
-from todo.db import get_db
+from microblog.db import get_db
 
 
 def test_get_close_db(app):
