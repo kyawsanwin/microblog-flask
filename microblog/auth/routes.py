@@ -1,7 +1,4 @@
-import functools
-
 from flask import (
-    Blueprint,
     render_template,
     request,
     redirect,
@@ -11,9 +8,9 @@ from flask import (
     g,
 )
 from werkzeug.security import check_password_hash, generate_password_hash
+from microblog.auth.decorators import check_already_loggedin
 from microblog.db import get_db
-
-bp = Blueprint("auth", __name__, url_prefix="/auth")
+from microblog.auth import bp
 
 
 @bp.before_app_request
@@ -26,16 +23,6 @@ def load_logged_in_user():
         g.user = (
             get_db().execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
         )
-
-
-def check_already_loggedin(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user:
-            return redirect(url_for("todo.index"))
-        return view(**kwargs)
-
-    return wrapped_view
 
 
 @bp.route("/login", methods=("GET", "POST"))
@@ -106,13 +93,3 @@ def register():
 def logout():
     session.clear()
     return redirect(url_for("auth.login"))
-
-
-def login_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for("auth.login"))
-        return view(**kwargs)
-
-    return wrapped_view

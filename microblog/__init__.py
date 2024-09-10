@@ -32,15 +32,19 @@ def create_app(test_config=None):
 
     app.register_blueprint(main_bp)
 
+    from .blog import bp as blog_bp
+
+    app.register_blueprint(blog_bp)
+
     from . import db
 
     db.init_app(app)
 
-    from . import auth
+    from .auth import bp as auth_bp
 
-    app.register_blueprint(auth.bp)
+    app.register_blueprint(auth_bp)
 
-    from .todo import todo
+    from .todo import bp as todo_bp
 
-    app.register_blueprint(todo.bp)
+    app.register_blueprint(todo_bp)
     return app

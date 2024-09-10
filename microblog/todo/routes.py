@@ -1,10 +1,9 @@
-from flask import Blueprint, render_template, request, flash, g
+from flask import render_template, request, flash, g
 
-from microblog.auth import login_required
+from microblog.auth.decorators import login_required
 from microblog.db import get_db
 from werkzeug.exceptions import abort
-
-bp = Blueprint("todo", __name__, url_prefix="/todos")
+from microblog.todo import bp
 
 
 def get_todo(id, check_author=True):
