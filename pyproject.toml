@@ -17,3 +17,6 @@ testpaths = ["test"]
 [tool.coverage.run]
 branch = true
 source = ["todo"]
+
+[tool.flake8]
+max-line-length = 88
