@@ -9,6 +9,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 from microblog.auth.decorators import check_already_loggedin
+from microblog.auth.forms import RegistrationForm, LoginForm
 from microblog.db import get_db
 from microblog.auth import bp
 
@@ -28,9 +29,10 @@ def load_logged_in_user():
 @bp.route("/login", methods=("GET", "POST"))
 @check_already_loggedin
 def login():
-    if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
+    form = LoginForm()
+    if request.method == "POST" and form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
 
         db = get_db()
 
@@ -49,44 +51,32 @@ def login():
             return redirect(url_for("todo.index"))
 
         flash(error)
-    return render_template("auth/login.html")
+    return render_template("auth/login.html", form=form)
 
 
 @bp.route("/register", methods=("GET", "POST"))
 @check_already_loggedin
 def register():
-    if request.method == "POST":
-        username = request.form["username"]
-        email = request.form["email"]
-        password = request.form["password"]
-        confirm_password = request.form["confirm_password"]
+    form = RegistrationForm()
+    if request.method == "POST" and form.validate_on_submit():
+        username = form.username.data
+        email = form.email.data
+        password = form.password.data
 
         db = get_db()
 
-        error = None
+        try:
+            db.execute(
+                "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+                (username, email, generate_password_hash(password)),
+            )
+            db.commit()
+        except db.IntegrityError:
+            flash(f"{username} or {email} is already registered.")
+        else:
+            return redirect(url_for("auth.login"))
 
-        if not username:
-            error = "Username is required."
-        elif not password:
-            error = "Password is required."
-        elif not confirm_password:
-            error = "Confirm password is required."
-        elif password != confirm_password:
-            error = "Confirm password doesn't match."
-        if error is None:
-            try:
-                db.execute(
-                    "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                    (username, email, generate_password_hash(password)),
-                )
-                db.commit()
-            except db.IntegrityError:
-                error = f"{username} or {email} is already registered."
-            else:
-                return redirect(url_for("auth.login"))
-        flash(error)
-
-    return render_template("auth/register.html")
+    return render_template("auth/register.html", form=form)
 
 
 @bp.route("/logout")

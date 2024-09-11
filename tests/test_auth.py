@@ -31,7 +31,8 @@ def test_register(client, app):
     ("username", "email", "password", "confirm_password", "message"),
     (
         ("", "", "", "", b"Username is required."),
-        ("a", "", "", "", b"Password is required."),
+        ("a", "", "", "", b"Email is required."),
+        ("a", "a@email.com", "", "", b"Password is required."),
         ("a", "a@email.com", "a", "", b"Confirm password is required."),
         ("a", "a@email.com", "a", "b", b"Confirm password doesn&#39;t match."),
         ("test", "test@email.com", "a", "a", b"already registered."),
