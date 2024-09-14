@@ -1,47 +1,70 @@
-import os
-import tempfile
-
 import pytest
-from microblog import create_app
-from microblog.db import get_db, init_db
-
-with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
-    _data_sql = f.read().decode("utf8")
+from microblog import create_app, db
+from microblog.auth import models as auth_models
+from microblog.todo.models import Todo
 
 
 @pytest.fixture
 def app():
-    db_fd, db_path = tempfile.mkstemp()
-
-    app = create_app({"TESTING": True, "DATABASE": db_path, "WTF_CSRF_ENABLED": False})
-
-    with app.app_context():
-        init_db()
-        get_db().executescript(_data_sql)
+    app = create_app(
+        {
+            "TESTING": True,
+            "SQLALCHEMY_DATABASE_URI": "sqlite:///project2.db",
+            "WTF_CSRF_ENABLED": False,
+        }
+    )
 
     yield app
-
-    os.close(db_fd)
-    os.unlink(db_path)
 
 
 @pytest.fixture
 def client(app):
-    return app.test_client()
+    with app.app_context():
+        return app.test_client()
 
 
 @pytest.fixture
-def runner(app):
-    return app.test_cli_runner()
+def init_db(app):
+    with app.app_context():
+        db.create_all()
+
+        user_one = auth_models.User(
+            username="testing",
+            email="testing@email.com",
+        )
+        user_one.set_password("a")
+        user_two = auth_models.User(
+            username="usertwo",
+            email="usertwo@email.com",
+        )
+        user_two.set_password("a")
+        db.session.add(user_one)
+        db.session.add(user_two)
+        db.session.commit()
+
+        todo_one = Todo(title="Todo title one", is_done=0, user=user_one)
+        todo_two = Todo(title="Todo title two", is_done=0, user=user_one)
+        todo_three = Todo(title="Todo title three", is_done=0, user=user_two)
+
+        db.session.add(todo_one)
+        db.session.add(todo_two)
+        db.session.add(todo_three)
+        db.session.commit()
+
+        yield
+
+        db.drop_all()
 
 
 class AuthActions(object):
     def __init__(self, client):
         self._client = client
 
-    def login(self, email="test@email.com", password="test"):
+    def login(self, email="testing@email.com", password="a"):
         return self._client.post(
-            "/auth/login", data={"email": email, "password": password}
+            "/auth/login",
+            data={"email": email, "password": password},
+            content_type="application/x-www-form-urlencoded",
         )
 
     def logout(self):

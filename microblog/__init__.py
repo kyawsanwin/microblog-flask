@@ -1,13 +1,18 @@
 import os
 import uuid
 from flask import Flask, jsonify
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+migrate = Migrate()
 
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY=str(uuid.uuid4()),
-        DATABASE=os.path.join(app.instance_path, "todo.sqlite"),
+        SQLALCHEMY_DATABASE_URI="sqlite:///project.db",
     )
 
     if test_config is None:
@@ -19,6 +24,15 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    with app.app_context():
+        from microblog.auth import models as auth_models
+        from microblog.todo import models as todo_models
+
+        db.create_all()
 
     @app.errorhandler(404)
     def resource_not_found(e):
@@ -35,10 +49,6 @@ def create_app(test_config=None):
     from .blog import bp as blog_bp
 
     app.register_blueprint(blog_bp)
-
-    from . import db
-
-    db.init_app(app)
 
     from .auth import bp as auth_bp
 

@@ -1,6 +1,7 @@
 import pytest
 from flask import g, session
-from microblog.db import get_db
+from microblog.auth.models import User
+from microblog import db
 
 
 def test_register(client, app):
@@ -18,11 +19,7 @@ def test_register(client, app):
 
     with app.app_context():
         assert (
-            get_db()
-            .execute(
-                "SELECT * FROM users WHERE username = 'test1'",
-            )
-            .fetchone()
+            db.session.execute(db.select(User).filter_by(username="test1")).scalar_one()
             is not None
         )
 
@@ -35,11 +32,11 @@ def test_register(client, app):
         ("a", "a@email.com", "", "", b"Password is required."),
         ("a", "a@email.com", "a", "", b"Confirm password is required."),
         ("a", "a@email.com", "a", "b", b"Confirm password doesn&#39;t match."),
-        ("test", "test@email.com", "a", "a", b"already registered."),
+        ("testing", "testing@email.com", "a", "a", b"already registered."),
     ),
 )
 def test_register_validate_input(
-    client, username, email, password, confirm_password, message
+    client, username, email, password, confirm_password, message, init_db
 ):
     response = client.post(
         "/auth/register",
@@ -53,25 +50,26 @@ def test_register_validate_input(
     assert message in response.data
 
 
-def test_login(client, auth):
+def test_login(client, auth, init_db):
     assert client.get("/auth/login").status_code == 200
     response = auth.login()
+    print(response.headers)
     assert response.headers["Location"] == "/todos"
 
     with client:
         client.get("/todos")
         assert session["user_id"] == 1
-        assert g.user["username"] == "test"
+        assert g.user.username == "testing"
 
 
 @pytest.mark.parametrize(
     ("email", "password", "message"),
     (
-        ("a", "test", b"Incorrect email address."),
-        ("test@email.com", "a", b"Incorrect password."),
+        ("a@email.com", "test", b"Incorrect email address."),
+        ("testing@email.com", "aa", b"Incorrect password."),
     ),
 )
-def test_login_validate_input(auth, email, password, message):
+def test_login_validate_input(auth, email, password, message, init_db):
     response = auth.login(email, password)
     assert message in response.data
 

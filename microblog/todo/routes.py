@@ -1,27 +1,20 @@
 from flask import render_template, request, flash, g
 
 from microblog.auth.decorators import login_required
-from microblog.db import get_db
 from werkzeug.exceptions import abort
 from microblog.todo import bp
+from microblog import db
+from microblog.todo.models import Todo
+from sqlalchemy import select
 
 
 def get_todo(id, check_author=True):
-    todo = (
-        get_db()
-        .execute(
-            "SELECT t.id, title, is_done, user_id FROM todos t"
-            " JOIN users u ON t.user_id = u.id"
-            " WHERE t.id = ?",
-            (id,),
-        )
-        .fetchone()
-    )
+    todo = db.session.execute(select(Todo).where(Todo.id == id)).scalar_one_or_none()
 
     if todo is None:
         abort(404, description=f"Todo id {id} doesn't exist.")
 
-    if check_author and todo["user_id"] != g.user["id"]:
+    if check_author and todo.user_id != g.user.id:
         abort(403, description="Not authorized.")
     return todo
 
@@ -40,29 +33,23 @@ def index():
         if error is not None:
             flash(error)
         else:
-            db = get_db()
-            db.execute(
-                "INSERT INTO todos (title, user_id)" " VALUES (?, ?)",
-                (title, g.user["id"]),
-            )
-            db.commit()
+            todo = Todo(title=title, user_id=g.user.id)
+            db.session.add(todo)
+            db.session.commit()
 
-    db = get_db()
-    todos = db.execute(
-        "SELECT t.id, title, is_done FROM todos t"
-        " JOIN users u ON t.user_id = u.id"
-        " ORDER BY is_done ASC"
-    ).fetchall()
+    todos = db.session.execute(select(Todo).where(Todo.user_id == g.user.id)).scalars()
+
     return render_template("todo/index.html", todos=todos)
 
 
 @bp.route("/delete/<int:id>", methods=("POST",))
 @login_required
 def delete(id):
-    get_todo(id)
-    db = get_db()
-    db.execute("DELETE FROM todos WHERE id = ?", (id,))
-    db.commit()
+    # dba.execute(s.delete(Todo).where(Todo.id == id))
+    # todo = dba.session.execute(select(Todo).where(Todo.id == id)).first()
+    todo = get_todo(id)
+    db.session.delete(todo)
+    db.session.commit()
     return {"status": 200, "deleted": 1}
 
 
@@ -71,16 +58,9 @@ def delete(id):
 def action(id):
     if request.method == "POST":
         is_done = request.form["is_done"]
-        get_todo(id)
-        db = get_db()
-        db.execute(
-            "UPDATE todos SET is_done = ? WHERE id = ?",
-            (
-                is_done,
-                id,
-            ),
-        )
-        db.commit()
+        todo = get_todo(id)
+        todo.is_done = is_done
+        db.session.commit()
         return {"status": 200, "updated": 1}
 
 
@@ -89,14 +69,7 @@ def action(id):
 def update(id):
     if request.method == "POST":
         title = request.form["title"]
-        get_todo(id)
-        db = get_db()
-        db.execute(
-            "UPDATE todos SET title = ? WHERE id = ?",
-            (
-                title,
-                id,
-            ),
-        )
-        db.commit()
+        todo = get_todo(id)
+        todo.title = title
+        db.session.commit()
         return {"status": 200, "updated": 1}

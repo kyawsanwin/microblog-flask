@@ -7,11 +7,14 @@ from flask import (
     session,
     g,
 )
+from sqlalchemy import select
 from werkzeug.security import check_password_hash, generate_password_hash
 from microblog.auth.decorators import check_already_loggedin
 from microblog.auth.forms import RegistrationForm, LoginForm
-from microblog.db import get_db
+from microblog.auth.models import User
+from microblog import db
 from microblog.auth import bp
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
 
 @bp.before_app_request
@@ -21,9 +24,7 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = (
-            get_db().execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
-        )
+        g.user = db.session.execute(select(User).filter_by(id=user_id)).scalar_one()
 
 
 @bp.route("/login", methods=("GET", "POST"))
@@ -34,20 +35,22 @@ def login():
         email = form.email.data
         password = form.password.data
 
-        db = get_db()
-
         error = None
+        user = None
+        try:
+            user = db.session.execute(select(User).filter_by(email=email)).scalar_one()
+        except NoResultFound:
+            error = "Error"
 
-        user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
-
-        if user is None:
+        if not user:
             error = "Incorrect email address."
-        elif not check_password_hash(user["password"], password):
+        elif not check_password_hash(user.password, password):
             error = "Incorrect password."
 
         if error is None:
             session.clear()
-            session["user_id"] = user["id"]
+            session["user_id"] = user.id
+
             return redirect(url_for("todo.index"))
 
         flash(error)
@@ -63,19 +66,20 @@ def register():
         email = form.email.data
         password = form.password.data
 
-        db = get_db()
-
+        user = User(
+            username=username, email=email, password=generate_password_hash(password)
+        )
+        error = None
         try:
-            db.execute(
-                "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                (username, email, generate_password_hash(password)),
-            )
-            db.commit()
-        except db.IntegrityError:
-            flash(f"{username} or {email} is already registered.")
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            error = f"{username} or {email} is already registered."
         else:
             return redirect(url_for("auth.login"))
 
+        flash(error)
     return render_template("auth/register.html", form=form)
 
 

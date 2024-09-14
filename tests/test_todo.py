@@ -1,5 +1,7 @@
 import pytest
-from microblog.db import get_db
+from sqlalchemy import select
+from microblog import db
+from microblog.todo.models import Todo
 
 
 def test_login_required(client):
@@ -7,40 +9,40 @@ def test_login_required(client):
     assert response.headers["Location"] == "/auth/login"
 
 
-def test_todo_index(client, auth):
+def test_todo_index(client, auth, init_db):
     auth.login()
     response = client.get("/todos")
     assert b"Logout" in response.data
-    assert b"test title" in response.data
+    assert b"Todo title one" in response.data
     assert b'data-item-url="/todos/delete/1"' in response.data
 
 
-def test_create(client, auth, app):
+def test_create(client, auth, app, init_db):
     auth.login()
     assert client.get("/todos").status_code == 200
 
     client.post("/todos", data={"title": "todo item."})
 
     with app.app_context():
-        db = get_db()
-        count = db.execute("SELECT COUNT(id) FROM todos").fetchone()[0]
+        # count = dba.select([dba.func.count()]).select_from(Todo).scalar()
+        count = db.session.query(Todo).count()
         assert count == 4
 
 
-def test_delete(client, auth, app):
+def test_delete(client, auth, app, init_db):
     auth.login()
     response = client.post("/todos/delete/1")
     assert b"deleted" in response.data
 
     with app.app_context():
-        db = get_db()
-        todo = db.execute("SELECT * FROM todos WHERE id = 1").fetchone()
+        # todo = dba.session.get(Todo, 1)
+        todo = db.session.execute(select(Todo).where(Todo.id == 1)).first()
         assert todo is None
 
 
-def test_delete_forbidden(client, auth, app):
+def test_delete_forbidden(client, auth, app, init_db):
     auth.login()
-    response = client.post("/todos/delete/2")
+    response = client.post("/todos/delete/3")
     assert b"error" in response.data
 
 
@@ -48,33 +50,31 @@ def test_delete_forbidden(client, auth, app):
     ("id", "is_done"),
     (
         (1, 1),
-        (3, 0),
+        (2, 0),
     ),
 )
-def test_action(client, auth, app, id, is_done):
+def test_action(client, auth, app, id, is_done, init_db):
     auth.login()
     response = client.post(f"/todos/{id}/action", data={"is_done": is_done})
     assert b"updated" in response.data
 
     with app.app_context():
-        db = get_db()
-        todo = db.execute("SELECT * FROM todos WHERE id = ?", (id,)).fetchone()
-        assert todo["is_done"] == is_done
+        todo = db.session.execute(select(Todo).where(Todo.id == id)).scalar_one()
+        assert todo.is_done == is_done
 
 
 @pytest.mark.parametrize(
     ("id", "title"),
     (
         (1, "Updated one."),
-        (3, "Updated two."),
+        (2, "Updated two."),
     ),
 )
-def test_update(client, auth, app, id, title):
+def test_update(client, auth, app, id, title, init_db):
     auth.login()
     response = client.post(f"/todos/{id}/update", data={"title": title})
     assert b"updated" in response.data
 
     with app.app_context():
-        db = get_db()
-        todo = db.execute("SELECT * FROM todos WHERE id = ?", (id,)).fetchone()
-        assert todo["title"] == title
+        todo = db.session.execute(select(Todo).where(Todo.id == id)).scalar_one()
+        assert todo.title == title
