@@ -18,7 +18,7 @@ class Todo(db.Model):
         default=lambda: datetime.now(timezone.utc)
     )
 
-    user: Mapped["User"] = relationship(back_populates="todos")
+    user: Mapped["User"] = relationship(back_populates="todos")  # noqa: F821
 
     def __repr__(self) -> str:
         return f"Todo({self.id}, {self.title}, {self.is_done})"

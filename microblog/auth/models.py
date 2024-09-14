@@ -18,7 +18,7 @@ class User(db.Model):
         default=lambda: datetime.now(timezone.utc)
     )
 
-    todos: Mapped[List["Todo"]] = relationship(
+    todos: Mapped[List["Todo"]] = relationship(  # noqa: F821
         back_populates="user", cascade="all, delete-orphan"
     )
 
