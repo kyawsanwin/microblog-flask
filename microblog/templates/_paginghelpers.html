@@ -1,0 +1,18 @@
+{% macro render_pagination(pagination, endpoint) %}
+    <div class="page-items text-gray-600 text-sm">
+        {{ pagination.first }} - {{ pagination.last }} of {{ pagination.total }}
+    </div>
+    <div class="pagination flex space-x-2 my-2">
+        {% for page in pagination.iter_pages() %}
+            {% if page %}
+                {% if page != pagination.page %}
+                    <a href="{{ url_for(endpoint, page=page) }}" class="px-3 py-1 border rounded-lg text-blue-500 hover:bg-blue-50 transition">{{ page }}</a>
+                {% else %}
+                    <strong class="px-3 py-1 border border-blue-500 bg-blue-100 text-blue-600 rounded-lg">{{ page }}</strong>
+                {% endif %}
+            {% else %}
+                <span class="ellipsis px-3 py-1">…</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endmacro %}

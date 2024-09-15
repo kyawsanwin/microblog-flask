@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold text-gray-800">Blogs</h2>
+    <a href="{{ url_for('blog.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+        New
+    </a>
+</div>
+
+<div class="bg-white shadow-md rounded-lg overflow-hidden max-w-4xl mx-auto my-8">
+    <div class="divide-y divide-gray-200">
+        {% for blog in blogs %}
+        <div class="p-6 hover:bg-gray-50 transition duration-300">
+            <h3 class="text-xl font-semibold text-gray-800">{{ blog.title }}</h3>
+            <div class="flex justify-between items-center mt-4 text-sm text-gray-500">
+                <p>By {{ blog.user.username }}</p>
+                <p>{{ blog.created_at.strftime('%d/%m/%Y') }}</p>
+            </div>
+            <p class="mt-2 text-gray-600">{{ blog.content }}</p>
+        </div>
+        {% endfor %}
+        <div class="mt-6">
+            {% from "_paginghelpers.html" import render_pagination %}
+            <div class="flex justify-center items-center space-x-2">
+                {{ render_pagination(blogs, 'blog.index') }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,6 +1,7 @@
 import pytest
 from microblog import create_app, db
 from microblog.auth import models as auth_models
+from microblog.blog.models import Blog
 from microblog.todo.models import Todo
 
 
@@ -49,6 +50,16 @@ def init_db(app):
         db.session.add(todo_one)
         db.session.add(todo_two)
         db.session.add(todo_three)
+        db.session.commit()
+
+        blog_one = Blog(
+            title="Blog title one", content="This is the content one.", user=user_one
+        )
+        blog_two = Blog(
+            title="Blog title two", content="This is the content two.", user=user_one
+        )
+        db.session.add(blog_one)
+        db.session.add(blog_two)
         db.session.commit()
 
         yield

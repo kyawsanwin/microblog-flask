@@ -22,6 +22,8 @@ class User(db.Model):
         back_populates="user", cascade="all, delete-orphan"
     )
 
+    blogs: Mapped[List["Blog"]] = relationship(back_populates="user")  # noqa: F821
+
     def __repr__(self) -> str:
         return f"User({self.id}, {self.username}, {self.email})"
 
