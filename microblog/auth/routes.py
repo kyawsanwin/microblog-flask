@@ -39,13 +39,10 @@ def login():
         user = None
         try:
             user = db.session.execute(select(User).filter_by(email=email)).scalar_one()
+            if not user.check_password(password):
+                error = "Incorrect password."
         except NoResultFound:
-            error = "Error"
-
-        if not user:
             error = "Incorrect email address."
-        elif not check_password_hash(user.password, password):
-            error = "Incorrect password."
 
         if error is None:
             session.clear()
