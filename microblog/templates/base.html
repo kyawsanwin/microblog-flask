@@ -19,9 +19,9 @@
                     <h1>Microblog</h1>
                 </a>
             </div>
-            {% set active_home = "bg-indigo-700 text-white" if url_for(request.endpoint) == "/" else "" %}
-            {% set active_blog = "bg-indigo-700 text-white" if url_for(request.endpoint) == "/blog" else "" %}
-            {% set active_todo = "bg-indigo-700 text-white" if url_for(request.endpoint) == "/todos" else "" %}
+            {% set active_home = "bg-indigo-700 text-white" if request.path == "/" else "" %}
+            {% set active_blog = "bg-indigo-700 text-white" if request.path == "/blog" else "" %}
+            {% set active_todo = "bg-indigo-700 text-white" if request.path == "/todos" else "" %}
             <!-- Menu items -->
             <div class="hidden sm:block ml-10 mr-auto">
                 <div class="flex space-x-4">

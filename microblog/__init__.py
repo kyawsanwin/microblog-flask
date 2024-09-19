@@ -1,6 +1,6 @@
 import os
 import uuid
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, request
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -36,7 +36,7 @@ def create_app(test_config=None):
 
     @app.errorhandler(404)
     def resource_not_found(e):
-        return jsonify(error=str(e)), 404
+        return render_template("404.html"), 404
 
     @app.errorhandler(403)
     def user_forbidden(e):
