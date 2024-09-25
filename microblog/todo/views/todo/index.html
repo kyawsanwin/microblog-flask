@@ -110,11 +110,10 @@
         
             // Function to save the edited todo item
             const saveTodo = () => {
-                hideInput();
-                const url = `/todos/${todoId}/update`;
+                const path = `/todos/${todoId}/update`;
                 const title = item.value;
         
-                fetch(url, {
+                fetch(path, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `title=${encodeURIComponent(title)}`,
@@ -139,6 +138,7 @@
             // Handle keypress events (save on 'Enter', cancel on 'Escape')
             item.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
+                    hideInput();
                     saveTodo();
                 }
             });
@@ -160,21 +160,13 @@
                 id = checkbox.getAttribute('data-item-id');
                 url = "/todos/" + id + "/action"
                 is_done = checkbox.checked ? 1 : 0
-                fetch(url, { method:"POST",
-                    headers: {'Content-Type':'application/x-www-form-urlencoded'},
-                    body:'is_done=' + is_done})
-                    .then(response => {
-                        if (response.redirected) {
-                            window.location = response.url
-                        }
-                    })
+                doneTodo(url, is_done)
             });
         });
         
         // Add event listener for each delete button to popup confirm box.
         deleteButtons.forEach(button => {
             button.addEventListener('click', () => {
-                console.log(button.getAttribute('data-item-url'));
                 _path = button.getAttribute('data-item-url');
                 _itemIDToDelete = button.getAttribute('data-item-id');
                 deleteModal.classList.remove('hidden');
@@ -189,22 +181,12 @@
         // Handle delete confirmation
         confirmDeleteButton.addEventListener('click', () => {
             deleteModal.classList.add('hidden');
-
-            fetch(_path, {method:"POST"})
-            .then(response => {
-                if (response.redirected) {
-                    window.location = response.url
-                }
-                data = response.json()
-                console.log(data)
-                if (response.status == 200) {
-                    const itemToDelete = document.getElementById(`item-${_itemIDToDelete}`)
-                    itemToDelete.remove()
-                } else {
-                    console.log("Can't delete.")
-                }
+            const itemToDelete = document.getElementById(`item-${_itemIDToDelete}`)
+            deleteTodo(_path, itemToDelete).then(data => {
+                console.log("deleted.")
             })
         });
         
     </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='todos.js')}}"></script>
 {% endblock %}
