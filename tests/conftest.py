@@ -1,3 +1,4 @@
+import uuid
 import pytest
 from microblog import create_app, db
 from microblog.auth import models as auth_models
@@ -9,6 +10,7 @@ from microblog.todo.models import Todo
 def app():
     app = create_app(
         {
+            "SECRET_KEY": str(uuid.uuid4()),
             "TESTING": True,
             "SQLALCHEMY_DATABASE_URI": "sqlite:///project2.db",
             "WTF_CSRF_ENABLED": False,
