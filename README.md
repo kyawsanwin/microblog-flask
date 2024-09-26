@@ -39,3 +39,13 @@ $ pip install -e .
 ```
 $ pytest
 ```
+# Create the Database
+### init the db
+```
+$ flask db init 
+// You man need to add FLASK_APP=microblog in system environment.
+```
+### migrage the db
+```
+$ flask db migrate
+```
