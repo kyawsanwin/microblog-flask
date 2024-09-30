@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block banner %}
+  <!-- Hero Section -->
+  <section class="bg-blue-500 text-white py-12">
+    <div class="container mx-auto text-center">
+      <h1 class="text-4xl font-bold">Welcome to Microblog & To-Do List</h1>
+      <p class="mt-4">Share your thoughts and organize your tasks efficiently.</p>
+    </div>
+  </section>
+{% endblock %}
+{% block section_one %}
+    <section class="bg-white p-6 shadow-lg rounded-lg">
+      <h2 class="text-2xl font-bold mb-4">Latest Posts</h2>
+      
+      {% for post in posts %}
+      <div class="mb-4">
+        <h3 class="text-xl font-semibold">{{ post.title }}</h3>
+        <p class="text-gray-700">{{ post.content }}</p>
+        <div class="text-sm text-gray-500">Posted by {{post.user.username}} on {{ post.created_at.strftime('%d/%m/%Y') }}</div>
+      </div>
+      {% endfor %}
+      <div class="mt-6">
+        <a href="{{ url_for("blog.index")}}" class="px-4 py-2 bg-blue-500 text-white rounded">More</a>
+      </div>
+    </section>
+{% endblock %}
+{% block section_two %}
+    <!-- To-Do List Section -->
+    <section class="bg-white p-6 shadow-lg rounded-lg">
+      <h2 class="text-2xl font-bold mb-4">My To-Do List</h2>
+      {% if g.user %}
+        {% for todo in todos %}
+          <div class="flex items-center mb-4">
+            <input type="checkbox" class="mr-2">
+            <span>{{ todo.title }}</span>
+          </div>
+        {% endfor %}
+        <div class="mt-6">
+          <a href="{{url_for("todo.index")}}" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">More</a>
+        </div>
+      {% else %}
+        <div class="mt-6">
+          <a href="{{url_for("auth.login")}}" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Login</a>
+        </div>
+      {% endif %}
+    </section>
+
+{% endblock %}

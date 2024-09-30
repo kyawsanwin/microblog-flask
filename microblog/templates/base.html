@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %}</title>
-    <link href="{{ url_for('static', filename='output.css') }}" rel="stylesheet">
+    <title>Basic Layout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
+<body class="min-h-screen flex flex-col">
 
 <!-- Navigation -->
-<nav class="bg-indigo-600">
+<nav class="bg-blue-600">
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div class="relative flex items-center justify-between h-16">
             
@@ -19,25 +19,25 @@
                     <h1>Microblog</h1>
                 </a>
             </div>
-            {% set active_home = "bg-indigo-700 text-white" if request.path == "/" else "" %}
-            {% set active_blog = "bg-indigo-700 text-white" if request.path == "/blog" else "" %}
-            {% set active_todo = "bg-indigo-700 text-white" if request.patht == "/todos" else "" %}
+            {% set active_home = "bg-blue-700 text-white" if request.path == "/" else "" %}
+            {% set active_blog = "bg-blue-700 text-white" if request.path == "/blog" else "" %}
+            {% set active_todo = "bg-blue-700 text-white" if request.path == "/todos" else "" %}
             <!-- Menu items -->
             <div class="hidden sm:block ml-10 mr-auto">
                 <div class="flex space-x-4">
-                    <a href="#" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ active_home }}">Home</a>
-                    <a href="{{ url_for('blog.index') }}" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ active_blog }}">Blog</a>
-                    <a href="{{ url_for('todo.index') }}" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ active_todo }}">Todo</a>
+                    <a href="/" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ active_home }}">Home</a>
+                    <a href="{{ url_for('blog.index') }}" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ active_blog }}">Blog</a>
+                    <a href="{{ url_for('todo.index') }}" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ active_todo }}">Todo</a>
                 </div>
             </div>
             <div class="hidden sm:block sm:ml-6">
                 <div class="flex space-x-4">
                     {% if g.user %}
                         <span class="text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Welcome, {{ g.user['username'] }}!</span>
-                        <a href="{{ url_for('auth.logout')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Logout</a>
+                        <a href="{{ url_for('auth.logout')}}" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Logout</a>
                     {% else %}
-                        <a href="{{ url_for('auth.register')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Register</a>
-                        <a href="{{ url_for('auth.login')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                        <a href="{{ url_for('auth.register')}}" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Register</a>
+                        <a href="{{ url_for('auth.login')}}" class="text-gray-300 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Login</a>
                     {% endif %}
                 </div>
             </div>
@@ -47,25 +47,45 @@
     <!-- Mobile menu (for smaller screens) -->
     <div class="sm:hidden">
         <div class="px-2 pt-2 pb-3 space-y-1">
-            <a href="#" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Home</a>
-            <a href="{{ url_for('blog.index')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Blogs</a>
-            <a href="{{ url_for('todo.index')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Todo</a>
+            <a href="#" class="text-gray-300 hover:bg-blue-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Home</a>
+            <a href="{{ url_for('blog.index')}}" class="text-gray-300 hover:bg-blue-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Blogs</a>
+            <a href="{{ url_for('todo.index')}}" class="text-gray-300 hover:bg-blue-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Todo</a>
             {% if g.user %}
                 <span class="text-gray-300 block px-3 py-2 rounded-md text-base font-medium">{{ g.user['username'] }}</span>
-                <a href="{{ url_for('auth.logout')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Logout</a>
+                <a href="{{ url_for('auth.logout')}}" class="text-gray-300 hover:bg-blue-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Logout</a>
             {% else %}
-                <a href="{{ url_for('auth.register')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Register</a>
-                <a href="{{ url_for('auth.login')}}" class="text-gray-300 hover:bg-indigo-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Login</a>
+                <a href="{{ url_for('auth.register')}}" class="text-gray-300 hover:bg-blue-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Register</a>
+                <a href="{{ url_for('auth.login')}}" class="text-gray-300 hover:bg-blue-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Login</a>
             {% endif %}
             
         </div>
     </div>
 </nav>
-<section class="max-w-4xl mx-auto mt-10">
-    {% for message in get_flashed_messages() %}
-        <div class="flash">{{ message }}</div>
-    {% endfor %}
-    {% block content %}{% endblock %}
-</section>
+
+{% block banner %}{% endblock %}
+<main class="flex-grow bg-gray-100">
+{% if active_home %}
+    <div class="container mx-auto my-10 grid grid-cols-1 md:grid-cols-2 gap-8 flex-shrink-1">
+        {% block section_one %}{% endblock %}
+        {% block section_two %}{% endblock %}
+    </div>
+{% else %}
+    <section class="max-w-4xl mx-auto mt-10 my-auto min-h-full">
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
+        {% block content %}{% endblock %}
+    </section>
+{% endif %}
+
+</main>
+
+<!-- Footer -->
+<footer class="bg-blue-600 text-white p-8">
+    <div class="container mx-auto text-center">
+        <p>&copy; 2024 Microblog</p>
+    </div>
+</footer>
+
 </body>
 </html>

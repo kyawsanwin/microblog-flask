@@ -22,3 +22,12 @@ class Todo(db.Model):
 
     def __repr__(self) -> str:
         return f"Todo({self.id}, {self.title}, {self.is_done})"
+
+    def get_undone_todos(self, user_id):
+        return (
+            db.session.query(Todo)
+            .where(Todo.user_id == user_id)
+            .filter_by(is_done=0)
+            .order_by(Todo.created_at)
+            .all()
+        )

@@ -24,3 +24,6 @@ class Blog(db.Model):
 
     def __repr__(self) -> str:
         return f"{self.id}, {self.title}"
+
+    def get_latest_posts(self, limit):
+        return db.session.query(Blog).order_by(Blog.created_at).limit(limit).all()
