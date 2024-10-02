@@ -1,5 +1,7 @@
-import uuid
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-SECRET_KEY = str(uuid.uuid4())
-SQLALCHEMY_DATABASE_URI = "sqlite:///project.db"
+SECRET_KEY = os.getenv("SECRET_KEY")
+SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")

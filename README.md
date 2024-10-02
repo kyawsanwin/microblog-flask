@@ -39,6 +39,9 @@ $ pip install -e .
 ```
 $ pytest
 ```
+# Create .env
+- Copy the `.env.example` to `.env`
+
 # Create the Database
 ### init the db
 ```
