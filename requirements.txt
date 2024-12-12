@@ -19,6 +19,7 @@ pluggy==1.5.0
 pycodestyle==2.12.1
 pyflakes==3.2.0
 pytest==8.3.2
+python-dotenv==1.0.1
 SQLAlchemy==2.0.34
 tomli==2.0.1
 typing_extensions==4.12.2
