@@ -40,7 +40,7 @@ $ pip install -e .
 $ pytest
 ```
 # Create .env
-- Copy the `.env.example` to `.env`
+- Copy the `microblog/.env.example` to `microblog/.env`
 
 # Create the Database
 ### init the db
@@ -51,4 +51,9 @@ $ flask db init
 ### migrage the db
 ```
 $ flask db migrate
+```
+
+### Run the app
+```
+$ flask --app microblog run
 ```
